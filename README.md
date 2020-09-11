@@ -2,7 +2,7 @@
 Learning purpose only!
 
 # Usage
-The bot isn't currently online, so I can't get you to use it.\n
+The bot isn't currently online, so I can't get you to use it.
 But if you want to create your own bot using mine as base, go on.
 
 # The current commands on the bot:
