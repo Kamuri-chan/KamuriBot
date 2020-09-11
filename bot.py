@@ -5,7 +5,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 import time
 from TOKENS import TELEGRAM_TOKEN
 from pedia_wiki import wiki_search
-from dl_from_yt import search_vid, download_vid
+from search_download import search_vid, download_vid
 
 # confirm if the imports are ok annie are you ok
 print("Starting bot...")
