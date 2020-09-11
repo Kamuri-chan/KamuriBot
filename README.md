@@ -20,12 +20,14 @@ for it, I'll be trying to deploy it somewhere, so be aware that it might become 
 that tries to end with all the human live on the Earth.
 
 
+### ---------------------------------------------------------------------------------------------------------------------
+
+
 # KamuriBot
 Propósito de aprendizagem apenas!
 
 # Uso
-O bot não está atualmente online, então você não pode usá-lo.  
-Mas se você quiser criar seu próprio bot usando o meu como base, vá em frente.
+O bot não está atualmente online, então você não pode usá-lo. Mas se você quiser criar seu próprio bot usando o meu como base, vá em frente.
 
 ## Os comandos atuais do bot:
 ### /start
