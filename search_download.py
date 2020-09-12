@@ -15,20 +15,25 @@ def extract_time(string, to_replace=[], replace_with=[]):
 
 
 # function to download video
-def download_vid(videoid):
+def download_vid(videoid, title):
+    # set out download link with the videoid
     prefix = "https://www.youtube.com/watch?v="
     link = prefix + videoid
 
-    ydl_opts = {'postprocessors': [{'key': 'FFmpegExtractAudio',
-                                    'preferredcodec': 'mp3',
-                                    'preferredquality': '192'}]}
+    # set the parameters, such as title and converter
+    ydl_opts = {'outtmpl': title, 'postprocessors': [
+        {'key': 'FFmpegExtractAudio',
+         'preferredcodec': 'mp3',
+         'preferredquality': '192'}]
+    }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([link])
 
 
 # function to search for youtube videos
 def search_vid(query):
-    youtube = discovery.build('youtube', 'v3', developerKey=YOUTUBE_TOKEN)
+    youtube = discovery.build(
+        'youtube', 'v3', developerKey=YOUTUBE_TOKEN, cache_discovery=False)
     # MAX_COUNT can be set to a max of 50, but i like lower values
     MAX_COUNT = 5
     nextPageToken = None
@@ -77,4 +82,4 @@ def search_vid(query):
         b = (f"{i}. {video_titles[index]} - Duração: ")
         c = (f"{video_durations[index]}\n")
         a = a + b + c
-    return a, video_ids
+    return a, video_ids, video_titles

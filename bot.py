@@ -1,11 +1,14 @@
 # import section
-from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, CallbackQueryHandler
+from telegram.ext import (Updater, CommandHandler,
+                          MessageHandler, CallbackQueryHandler, Filters)
 import logging
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-import time
 from TOKENS import TELEGRAM_TOKEN
 from wiki_search import wikipedia_search
 from search_download import search_vid, download_vid
+from os import remove
+
+keep_file = False
 
 # confirm if the imports are ok annie are you ok
 print("Starting bot...")
@@ -21,17 +24,55 @@ logging.basicConfig(
     level=logging.INFO)
 
 
+# ======== here is the function scope, where you create your functions ========
+
 # create start function for the /start command
 def start(update, context):
+    response = get_help()
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text="non ne non"
+        chat_id=update.effective_chat.id, text=response
     )
+
+
+# create get_help function to be used in /start and /help
+def get_help(arg=None):
+    if arg is None:
+        return """Este é um bot que eu criei para testes e aprendizado.
+Os comandos presentes no momento são:
+/help
+/search
+/download
+Mais comandos serão adicionados futuramente.
+Para saber mais sobre um comando, digite /help nome_do_comando (sem /).
+Repositório do projeto, com mais informações:
+https://github.com/Kamuri-chan/KamuriBot"""
+    if arg == "search":
+        return """/search:
+Comando que pesquisa algo na wikipédia e retorna o que econtrar para o usuário.
+Uso: /search termo_de_pesquisa."""
+    if arg == 'download':
+        return """/download:
+Comando que pesquisa o vídeo que o user quiser no Youtube, retorna uma lista com
+os resultados e mostra um menu de botões para o usuário escolher.
+Depois faz download do vídeo e converte em .mp3.
+Ainda em construção! Não está enviando audio ainda, só espere.
+Uso: /download nome_do_video."""
+
+
+# create /help function, can get help from the previous get_help function
+def help(update, context):
+    value = update.message.text.partition(' ')[2]
+    if value == "":
+        value = None
+    response = get_help(value)
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=response)
 
 
 # create search function for the /search command
 def search(update, context):
     value = update.message.text.partition(' ')[2]  # takes user message
-    response = wiki_search(value)  # uses the wikipedia api to retrieve
+    response = wikipedia_search(value)  # uses the wikipedia api to retrieve
     context.bot.send_message(
         chat_id=update.effective_chat.id, text=response
     )
@@ -41,12 +82,14 @@ def search(update, context):
 def download(update, context):
     # takes user search query
     value = update.message.text.partition(' ')[2]
-    global video_ids  # set the video ids as global
+    global video_ids
+    global video_titles  # set the video ids ant title as global
     # note: it's define as global so we can use it inside another function
     # without return
-    response, video_ids = search_vid(value)
+    response, video_ids, video_titles = search_vid(value)
     context.bot.send_message(
         chat_id=update.effective_chat.id, text=response)
+
     # define the list of options so the user can choose the video
     # you can define this dynamically, but i prefer no
     list_of_opts = ['1', '2',
@@ -55,27 +98,11 @@ def download(update, context):
     for each in list_of_opts:
         # create buttons
         button_list.append(InlineKeyboardButton(each, callback_data=each))
-    # n_cols = 1 is for single column and mutliple rows
+    # n_cols = 5 is for single row and mutliple columns
     reply_markup = InlineKeyboardMarkup(build_menu(button_list, n_cols=5))
     context.bot.send_message(chat_id=update.message.chat_id,
                              text='Escolha a opção: ',
                              reply_markup=reply_markup)
-
-
-# create callback handler for the buttons and call the download function
-def callback_query_handler(update, context):
-    # retrieve the data from the button
-    cqd = update.callback_query.data
-    # try-except so we can convert the data to int
-    try:
-        cqd = int(cqd)
-    except ValueError:
-        pass
-    # send message of confirmation to the user, you can get rid of this
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Baixando música...")
-    # calls the download_vid function
-    download_vid(video_ids[cqd - 1])
 
 
 # create build_menu function to, as the name says, bake a cake
@@ -89,17 +116,62 @@ def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
     return menu
 
 
+# create callback handler for the buttons and call the download function
+def callback_query_handler(update, context):
+    global video_titles
+    # retrieve the data from the button
+    cqd = update.callback_query.data
+    # try-except so we can convert the data to int
+    try:
+        cqd = int(cqd)
+    except ValueError:
+        pass
+    # send message of confirmation to the user, you can get rid of this
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Baixando música...")
+    # retrieve the video title, so we can rename our file to video_name.mp3
+    title = video_titles[cqd - 1]
+    # calls the download_vid function
+    download_vid(video_ids[cqd - 1], title)
+    # send audio function, read the documentation pls
+    context.bot.send_audio(chat_id=update.effective_chat.id,
+                           audio=open(title + '.mp3', 'rb'))
+
+    # keep_file its just for test if we can delete a file
+    # and sometimes when i'm testing i like to download a song for me
+    global keep_file
+    if not keep_file:
+        remove(title + '.mp3')
+
+
+def unknown(update, context):
+    pass
+
+
+# ====== end of the function scope, do not put functions down or you'll die ===
+
 # set handler for the start function
 start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
+
 # set handler for the search function
 search_handler = CommandHandler('search', search)
 dispatcher.add_handler(search_handler)
+
 # set handler for the download function
 download_handler = CommandHandler('download', download)
 dispatcher.add_handler(download_handler)
+
+# set handler for the help function
+help_handler = CommandHandler('help', help)
+dispatcher.add_handler(help_handler)
+
 # set handler for the CallbackQuery
 dispatcher.add_handler(CallbackQueryHandler(callback_query_handler))
+
+# set handler for the unkown, this has to be aways the last
+unknown_handler = MessageHandler(Filters.command, unknown)
+dispatcher.add_handler(unknown_handler)
 
 # run bot run
 updater.start_polling()
