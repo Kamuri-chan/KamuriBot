@@ -11,8 +11,7 @@ The /start command every bot has.
 Search over Wikipedia in my language (which in case is portuguese, but you can chance anytime).
 ### /download "video title"
 Searchs over Youtube to find the video the user wants, then shows a list of buttons.  
-The user can choose one option with the buttons and the bot will download it.  
-This function is actually incomplete, as the bot doesn't send the music to the user.
+The user can choose one option with the buttons and the bot will download it. Then it will send the music fot the user and delete the local file to save space (very useful if you have your bot hosted in something like pythonanythere).
 
 # Further notes
 As you can see, the bot stills in developement. Soon as I can see at least a low level of utility
@@ -36,8 +35,7 @@ O comando /start que todo bot tem.
 Procura algo na Wikipedia na minha lingua (que é Portugês, mas você pode mudar a qualquer hora).
 ### /download "titulo do video"
 Procura pelo Youtube para achar o vídeo que o usuário quer.  
-O usuário pode escolher uma opção com os botões e o bot irá baixá-lo.  
-Essa função está atualmente incompleta, já que o bot não consegue enviar a música.
+O usuário pode escolher uma opção com os botões e o bot irá baixá-lo. Então, ele envia a música para o usuário e deleta o arquivo local para economizar espaço (bem util quando seu bot está em algum lugar como o pythonanywhere).
 
 # Further notes
 Como você pode ver, o bot continua em desenvolvimento. Quando eu ver pelo menos um pequeno nível de utilidade para ele,
