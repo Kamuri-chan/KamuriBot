@@ -30,6 +30,52 @@ def download_vid(videoid, title):
         ydl.download([link])
 
 
+def video_details(video_ids, retrieve_title=False):
+    # this can return the duration or the title, depending on the retrieve
+    # i think i should do 2 separate functions, but let's do it later
+    youtube = discovery.build(
+        'youtube', 'v3', developerKey=YOUTUBE_TOKEN, cache_discovery=False)
+    video_durations = []
+    # checks if the ids are in a list
+    if isinstance(video_ids, list):
+        for _id in video_ids:
+            # same as before but now taking only the content details
+            requests = youtube.videos().list(part='snippet, contentDetails',
+                                             id=_id)
+            response = requests.execute()
+            items = response['items']
+            for each_item in items:
+                print(items)
+                for x, y in each_item.items():
+                    if isinstance(y, dict):
+                        for k, v in y.items():
+                            if k == "duration":
+                                video_durations.append(
+                                    extract_time(v,
+                                                 to_replace=[
+                                                     'P', "T"],
+                                                 replace_with=[
+                                                     '', '']))
+    else:
+        # same as before but now taking only the content details
+        requests = youtube.videos().list(part='snippet, contentDetails',
+                                         id=video_ids)
+        response = requests.execute()
+        items = response['items']
+        for each_item in items:
+            # print(items)
+            for x, y in each_item.items():
+                if isinstance(y, dict):
+                    for k, v in y.items():
+                        if retrieve_title:
+                            if k == "title":
+                                title = v
+    if retrieve_title:
+        return title
+    else:
+        return video_durations
+
+
 # function to search for youtube videos
 def search_vid(query):
     youtube = discovery.build(
@@ -56,24 +102,7 @@ def search_vid(query):
                         video_ids.append(v)
                     if k == 'title':
                         video_titles.append(v)
-
-    video_durations = []
-    for _id in video_ids:
-        # same as before but now taking only the content details
-        requests = youtube.videos().list(part='snippet, contentDetails',
-                                         id=_id)
-        response = requests.execute()
-        items = response['items']
-        for each_item in items:
-            for x, y in each_item.items():
-                if isinstance(y, dict):
-                    for k, v in y.items():
-                        if k == "duration":
-                            video_durations.append(extract_time(v,
-                                                                to_replace=[
-                                                                    'P', "T"],
-                                                                replace_with=[
-                                                                    '', '']))
+    video_durations = video_details(video_ids)
     # output for the user
     i = 0
     a = ""

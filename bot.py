@@ -5,7 +5,7 @@ import logging
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from TOKENS import TELEGRAM_TOKEN
 from wiki_search import wikipedia_search
-from search_download import search_vid, download_vid
+from search_download import search_vid, download_vid, video_details
 from os import remove
 
 keep_file = False
@@ -82,27 +82,43 @@ def search(update, context):
 def download(update, context):
     # takes user search query
     value = update.message.text.partition(' ')[2]
-    global video_ids
+    global video_id
     global video_titles  # set the video ids ant title as global
     # note: it's define as global so we can use it inside another function
     # without return
-    response, video_ids, video_titles = search_vid(value)
-    context.bot.send_message(
-        chat_id=update.effective_chat.id, text=response)
 
-    # define the list of options so the user can choose the video
-    # you can define this dynamically, but i prefer no
-    list_of_opts = ['1', '2',
-                    '3', '4', '5']
-    button_list = []
-    for each in list_of_opts:
-        # create buttons
-        button_list.append(InlineKeyboardButton(each, callback_data=each))
-    # n_cols = 5 is for single row and mutliple columns
-    reply_markup = InlineKeyboardMarkup(build_menu(button_list, n_cols=5))
-    context.bot.send_message(chat_id=update.message.chat_id,
-                             text='Escolha a opção: ',
-                             reply_markup=reply_markup)
+    # this checks if the user sends a link, so takes the id and download the file
+    if "https://www.youtube.com/watch?v=" in value:
+        video_id = value.replace("https://www.youtube.com/watch?v=", "")
+        title = video_details(video_id, retrieve_title=True)
+        download_vid(video_id, title)
+        # send audio function, read the documentation pls
+        context.bot.send_audio(chat_id=update.effective_chat.id,
+                               audio=open(title + '.mp3', 'rb'))
+
+        # keep_file its just for test if we can delete a file
+        # and sometimes when i'm testing i like to download a song for me
+        global keep_file
+        if not keep_file:
+            remove(title + '.mp3')
+    else:
+        response, video_id, video_titles = search_vid(value)
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text=response)
+
+        # define the list of options so the user can choose the video
+        # you can define this dynamically, but i prefer no
+        list_of_opts = ['1', '2',
+                        '3', '4', '5']
+        button_list = []
+        for each in list_of_opts:
+            # create buttons
+            button_list.append(InlineKeyboardButton(each, callback_data=each))
+        # n_cols = 5 is for single row and mutliple columns
+        reply_markup = InlineKeyboardMarkup(build_menu(button_list, n_cols=5))
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Escolha a opção: ',
+                                 reply_markup=reply_markup)
 
 
 # create build_menu function to, as the name says, bake a cake
@@ -132,7 +148,7 @@ def callback_query_handler(update, context):
     # retrieve the video title, so we can rename our file to video_name.mp3
     title = video_titles[cqd - 1]
     # calls the download_vid function
-    download_vid(video_ids[cqd - 1], title)
+    download_vid(video_id[cqd - 1], title)
     # send audio function, read the documentation pls
     context.bot.send_audio(chat_id=update.effective_chat.id,
                            audio=open(title + '.mp3', 'rb'))
@@ -144,6 +160,7 @@ def callback_query_handler(update, context):
         remove(title + '.mp3')
 
 
+# creates the unknown function to deal with unknown commands
 def unknown(update, context):
     pass
 
