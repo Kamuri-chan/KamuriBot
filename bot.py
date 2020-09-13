@@ -5,7 +5,7 @@ import logging
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from TOKENS import TELEGRAM_TOKEN
 from wiki_search import wikipedia_search
-from search_download import search_vid, download_vid, video_details
+from search_download import search_vid, download_vid, video_title
 from os import remove
 
 keep_file = False
@@ -48,14 +48,14 @@ Repositório do projeto, com mais informações:
 https://github.com/Kamuri-chan/KamuriBot"""
     if arg == "search":
         return """/search:
-Comando que pesquisa algo na wikipédia e retorna o que econtrar para o usuário.
+Comando que pesquisa algo na wikipédia e retorna o que encontrar para o usuário.
 Uso: /search termo_de_pesquisa."""
     if arg == 'download':
         return """/download:
 Comando que pesquisa o vídeo que o user quiser no Youtube, retorna uma lista com
 os resultados e mostra um menu de botões para o usuário escolher.
-Depois faz download do vídeo e converte em .mp3.
-Ainda em construção! Não está enviando audio ainda, só espere.
+O usuário também pode enviar um link do vídeo para o bot.
+Depois, o bot faz o download do vídeo e converte em .mp3.
 Uso: /download nome_do_video."""
 
 
@@ -90,7 +90,7 @@ def download(update, context):
     # this checks if the user sends a link, so takes the id and download the file
     if "https://www.youtube.com/watch?v=" in value:
         video_id = value.replace("https://www.youtube.com/watch?v=", "")
-        title = video_details(video_id, retrieve_title=True)
+        title = video_title(video_id)
         download_vid(video_id, title)
         # send audio function, read the documentation pls
         context.bot.send_audio(chat_id=update.effective_chat.id,
@@ -150,6 +150,7 @@ def callback_query_handler(update, context):
     # calls the download_vid function
     download_vid(video_id[cqd - 1], title)
     # send audio function, read the documentation pls
+    print('sending audio file...')
     context.bot.send_audio(chat_id=update.effective_chat.id,
                            audio=open(title + '.mp3', 'rb'))
 
@@ -157,7 +158,9 @@ def callback_query_handler(update, context):
     # and sometimes when i'm testing i like to download a song for me
     global keep_file
     if not keep_file:
+        print("deleting mp3 file...")
         remove(title + '.mp3')
+        print('Done!')
 
 
 # creates the unknown function to deal with unknown commands
