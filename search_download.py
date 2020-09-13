@@ -30,10 +30,10 @@ def download_vid(videoid, title):
         ydl.download([link])
 
 
-def video_details(video_ids):
+def video_durations(video_ids):
     youtube = discovery.build(
         'youtube', 'v3', developerKey=YOUTUBE_TOKEN, cache_discovery=False)
-    video_durations = []
+    video_times = []
     for _id in video_ids:
         # same as before but now taking only the content details
         requests = youtube.videos().list(part='snippet, contentDetails',
@@ -45,12 +45,13 @@ def video_details(video_ids):
                 if isinstance(y, dict):
                     for k, v in y.items():
                         if k == "duration":
-                            video_durations.append(
+                            video_times.append(
                                 extract_time(v,
                                              to_replace=[
                                                  'P', "T"],
                                              replace_with=[
                                                  '', '']))
+    return video_times
 
 
 def video_title(_id):
@@ -69,6 +70,7 @@ def video_title(_id):
                     if k == "title":
                         title = v
     return title
+
 
 # function to search for youtube videos
 def search_vid(query):
@@ -96,13 +98,13 @@ def search_vid(query):
                         video_ids.append(v)
                     if k == 'title':
                         video_titles.append(v)
-    video_durations = video_details(video_ids)
+    video_times = video_durations(video_ids)
     # output for the user
     i = 0
     a = ""
     for index in range(len(video_titles)):
         i += 1
         b = (f"{i}. {video_titles[index]} - Duração: ")
-        c = (f"{video_durations[index]}\n")
+        c = (f"{video_times[index]}\n")
         a = a + b + c
     return a, video_ids, video_titles
