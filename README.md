@@ -14,7 +14,7 @@ Searches over Youtube to find the video the user wants, then shows a list of but
 The user can choose one option with the buttons and the bot will download it. Then it will send the music for the user and delete the local file to save space (very useful if you have your bot hosted in something like pythonanythere).
 
 # Further notes
-As you can see, the bot stills in developement. I'm trying to find the better place to deploy it, so be aware that it might become something out of control
+As you can see, the bot stills in developement. There's no async function yet, but it's on my to-do list. I'm trying to find the better place to deploy it, so be aware that it might become something out of control
 that tries to end with all the human live on the Earth.
 
 
@@ -37,4 +37,4 @@ Procura pelo Youtube para achar o vídeo que o usuário quer.
 O usuário pode escolher uma opção com os botões e o bot irá baixá-lo. Então, ele envia a música para o usuário e deleta o arquivo local para economizar espaço (bem util quando seu bot está em algum lugar como o pythonanywhere).
 
 # Further notes
-Como você pode ver, o bot continua em desenvolvimento. Eu estou tentando encontrar o melhor lugar para fazer deploy, então tenha em mente que ele pode se tornar algo fora de controle que tenta por um fim a toda a vida humana na Terra.
+Como você pode ver, o bot continua em desenvolvimento. Não tem função assíncrona ainda, mas ta na minha lista para fazer. Eu estou tentando encontrar o melhor lugar para fazer deploy, então tenha em mente que ele pode se tornar algo fora de controle que tenta por um fim a toda a vida humana na Terra.
