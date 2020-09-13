@@ -33,7 +33,7 @@ Eu nçao consigo encontrar um host que eu goste para fazer deploy do bot, então
 O comando /start que todo bot tem.
 ### /search "termo de pesquisa
 Procura algo na Wikipedia na minha lingua (que é Portugês, mas você pode mudar a qualquer hora).
-### /download "titulo do video" ou /search "link do video"
+### /download "titulo do video" ou /download "link do video"
 Procura pelo Youtube para achar o vídeo que o usuário quer.  
 O usuário pode escolher uma opção com os botões e o bot irá baixá-lo. Então, ele envia a música para o usuário e deleta o arquivo local para economizar espaço (bem util quando seu bot está em algum lugar como o pythonanywhere).
 
