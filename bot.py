@@ -1,15 +1,18 @@
 # import section
+import telegram
 from telegram.ext import (Updater, CommandHandler,
                           MessageHandler, CallbackQueryHandler, Filters)
 import logging
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.utils.helpers import mention_markdown
 from TOKENS import TELEGRAM_TOKEN
 from wiki_search import wikipedia_search
-from search_download import search_vid, download_vid, video_details
+# from search_download import search_vid, download_vid, video_details
 from os import remove
+import textFile
 
 keep_file = False
-
+file = ""
 # confirm if the imports are ok annie are you ok
 print("Starting bot...")
 
@@ -41,7 +44,7 @@ def get_help(arg=None):
 Os comandos presentes no momento são:
 /help
 /search
-/download
+/download (INDISPONÍVEL NO MOMENTO)
 Mais comandos serão adicionados futuramente.
 Para saber mais sobre um comando, digite /help nome_do_comando (sem /).
 Repositório do projeto, com mais informações:
@@ -51,12 +54,7 @@ https://github.com/Kamuri-chan/KamuriBot"""
 Comando que pesquisa algo na wikipédia e retorna o que econtrar para o usuário.
 Uso: /search termo_de_pesquisa."""
     if arg == 'download':
-        return """/download:
-Comando que pesquisa o vídeo que o user quiser no Youtube, retorna uma lista com
-os resultados e mostra um menu de botões para o usuário escolher.
-Depois faz download do vídeo e converte em .mp3.
-Ainda em construção! Não está enviando audio ainda, só espere.
-Uso: /download nome_do_video."""
+        return """/download: Desabilitado por razões técnicas!"""
 
 
 # create /help function, can get help from the previous get_help function
@@ -80,7 +78,10 @@ def search(update, context):
 
 # create download function for the /download command
 def download(update, context):
-    # takes user search query
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Desabilitado por razões técnicas!")
+    """# takes user search query
     value = update.message.text.partition(' ')[2]
     global video_id
     global video_titles  # set the video ids ant title as global
@@ -118,9 +119,9 @@ def download(update, context):
         reply_markup = InlineKeyboardMarkup(build_menu(button_list, n_cols=5))
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Escolha a opção: ',
-                                 reply_markup=reply_markup)
+                                 reply_markup=reply_markup)"""
 
-
+"""
 # create build_menu function to, as the name says, bake a cake
 def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
     # this is in the documentation, read it pls onegai
@@ -159,6 +160,43 @@ def callback_query_handler(update, context):
     if not keep_file:
         remove(title + '.mp3')
 
+"""
+
+
+def pingme_command(update, context):
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+    username = user.username or user.first_name or 'anon'
+    file = textFile.get_file(chat_id)
+    args = str(user.id) + ";" + str(username)
+    textFile.add_new_user(file, args)
+    context.bot.send_message(chat_id=chat_id, text=f"{username} adicionado na lista de ping!")
+
+
+def pingall_command(update, context):
+    chat_id = update.effective_chat.id
+    file = textFile.get_file(chat_id)
+    user_list = textFile.get_all_users(file, chat_id)
+    u = [u for u in user_list]
+    empty_list = []
+    for i in u:
+        empty_list.append(mention_markdown(i[0], textFile.unicode_truncate(i[1], 100), version=2))
+    for chunk in textFile.chunks(empty_list, 4):
+        message = ' '.join(chunk)
+        context.bot.send_message(chat_id=chat_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN_V2)
+
+
+def unpingme(update, context):
+    chat_id = update.effective_chat.id
+    file = textFile.get_file(chat_id)
+    user = update.effective_user
+    try:
+        textFile.delete_user(file, user.id)
+        message = f"User {user.username} unpingado com sucesso!"
+    except TypeError:
+        message = f"User {user.username} não está na lista!"
+    context.bot.send_message(chat_id=chat_id, text=message)
+
 
 # creates the unknown function to deal with unknown commands
 def unknown(update, context):
@@ -184,8 +222,16 @@ help_handler = CommandHandler('help', help)
 dispatcher.add_handler(help_handler)
 
 # set handler for the CallbackQuery
-dispatcher.add_handler(CallbackQueryHandler(callback_query_handler))
+# dispatcher.add_handler(CallbackQueryHandler(callback_query_handler))
 
+pingme_handler = CommandHandler('pingme', pingme_command)
+dispatcher.add_handler(pingme_handler)
+
+pingall_handler = CommandHandler('pingall', pingall_command)
+dispatcher.add_handler(pingall_handler)
+
+unping_handler = CommandHandler('unpingme', unpingme)
+dispatcher.add_handler(unping_handler)
 # set handler for the unkown, this has to be aways the last
 unknown_handler = MessageHandler(Filters.command, unknown)
 dispatcher.add_handler(unknown_handler)

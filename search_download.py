@@ -45,7 +45,6 @@ def video_details(video_ids, retrieve_title=False):
             response = requests.execute()
             items = response['items']
             for each_item in items:
-                print(items)
                 for x, y in each_item.items():
                     if isinstance(y, dict):
                         for k, v in y.items():
